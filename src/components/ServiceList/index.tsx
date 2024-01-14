@@ -3,11 +3,12 @@ import type { Service } from "../../types";
 import { Box, MenuList, MenuItem, List, ListItemText } from "@mui/material";
 
 interface Props {
+  selectedServiceId: number;
   list: Service[];
   onSelect: (serviceId: number) => void;
 }
 
-const ServiceList = ({ list, onSelect }: Props) => {
+const ServiceList = ({ selectedServiceId, list, onSelect }: Props) => {
   return (
     <Box
       sx={{
@@ -20,7 +21,11 @@ const ServiceList = ({ list, onSelect }: Props) => {
       <h2>Service List</h2>
       <MenuList>
         {list.map((service) => (
-          <MenuItem key={service.id} onClick={() => onSelect(service.id)}>
+          <MenuItem
+            key={service.id}
+            onClick={() => onSelect(service.id)}
+            selected={service.id === selectedServiceId}
+          >
             <ListItemText>{service.name}</ListItemText>
           </MenuItem>
         ))}

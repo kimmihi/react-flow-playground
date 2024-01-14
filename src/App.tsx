@@ -1,4 +1,5 @@
-import type { NodeData } from "./types";
+import type { NodeData, Service, Node as TypeNode } from "./types";
+
 import React, { useState, useCallback, useRef } from "react";
 import { Box } from "@mui/material";
 import ReactFlow, {
@@ -14,7 +15,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 
-import { serviceList } from "./mocks";
+import { serviceList as mockedServiceList } from "./mocks";
 
 import ServiceList from "./components/ServiceList";
 import InputNode from "./components/CustomNode/InputNode";
@@ -45,16 +46,16 @@ const nodeTypes = {
 
 function App() {
   const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
-  const [currentService, setCurrentService] = useState<number | null>(
-    serviceList[0].id
-  );
+  const [serviceList, setServiceList] = useState<Service[]>(mockedServiceList);
+  const [currentService, setCurrentService] = useState<Service>(serviceList[0]);
   const [popoverControl, setPopoverControl] = useState({
     open: false,
     top: 0,
     left: 0,
   });
-  const [nodes, setNodes, onNodesChange] =
-    useNodesState<NodeData>(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>(
+    currentService.nodes
+  );
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const handlePaneContextMenu = useCallback(
@@ -76,17 +77,26 @@ function App() {
     (top: number, left: number, name: string) => {
       if (popoverControl.open === false) return;
 
-      const newNode = {
+      const newNode: TypeNode = {
         id: `${new Date().getTime()}`,
         data: { name },
         position: { x: left, y: top },
         type: "text",
       };
 
-      setNodes((prevNodes) => [...prevNodes, newNode]);
+      const updatedCurrentService: Service = {
+        ...currentService,
+        nodes: [...currentService.nodes, newNode],
+      };
+      setCurrentService(updatedCurrentService);
+      setServiceList((prev) =>
+        prev.map((prev) =>
+          prev.id === updatedCurrentService.id ? updatedCurrentService : prev
+        )
+      );
       handleClosePopover();
     },
-    [popoverControl.open, setNodes]
+    [currentService, popoverControl.open]
   );
 
   const handleClosePopover = () => {
@@ -98,7 +108,12 @@ function App() {
   };
 
   const handleChangeService = (serviceId: number) => {
-    setCurrentService(serviceId);
+    const newService = serviceList.find((service) => service.id === serviceId);
+    if (newService === undefined) {
+      return;
+    }
+
+    setCurrentService(newService);
   };
 
   return (
@@ -123,7 +138,7 @@ function App() {
       >
         <ReactFlow
           nodeTypes={nodeTypes}
-          nodes={nodes}
+          nodes={currentService.nodes}
           onNodesChange={onNodesChange}
           edges={edges}
           onEdgesChange={onEdgesChange}
@@ -136,7 +151,11 @@ function App() {
             }}
           />
           <Panel position="top-left" style={{ width: "320px", height: "100%" }}>
-            <ServiceList list={serviceList} onSelect={handleChangeService} />
+            <ServiceList
+              selectedServiceId={currentService.id}
+              list={serviceList}
+              onSelect={handleChangeService}
+            />
           </Panel>
           <Panel position="top-center">
             <Controls />
