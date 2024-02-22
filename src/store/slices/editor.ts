@@ -103,6 +103,21 @@ const editorSlice = createSlice({
         },
       };
     },
+    deleteNode: (
+      state,
+      action: PayloadAction<{ serviceId: string; nodeId: string }>
+    ) => {
+      const { serviceId, nodeId } = action.payload;
+      const nodes = state.nodes[serviceId];
+      const filteredNodes = nodes.filter(({ id }) => id !== nodeId);
+      return {
+        ...state,
+        nodes: {
+          ...state.nodes,
+          [serviceId]: filteredNodes,
+        },
+      };
+    },
     createEdge: (
       state,
       action: PayloadAction<{ serviceId: string; connection: Connection }>
@@ -139,6 +154,7 @@ export const {
   changeCurrentSerivce,
   createNode,
   changeNodes,
+  deleteNode,
   createEdge,
 } = editorSlice.actions;
 

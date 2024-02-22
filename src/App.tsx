@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef } from "react";
+import type { Node, Edge } from "reactflow";
 import { Box } from "@mui/material";
 import ReactFlow, {
   Controls,
@@ -7,6 +8,7 @@ import ReactFlow, {
   OnNodesChange,
   Panel,
   OnConnect,
+  OnNodesDelete,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -66,6 +68,10 @@ function App() {
     dispatch(changeNodes({ serviceId: currentSerivceId, newNodes }));
   };
 
+  const handleNodesDelete: OnNodesDelete = (nodes: Node[]) => {
+    console.log(nodes);
+  };
+
   const handleConnect: OnConnect = (connection) => {
     if (currentSerivceId === null) {
       return;
@@ -103,11 +109,13 @@ function App() {
           nodeTypes={nodeTypes}
           nodes={nodes}
           onNodesChange={onNodesChange}
+          onNodesDelete={handleNodesDelete}
           edges={edges}
           // onEdgesChange={onEdgesChange}
           onPaneContextMenu={handlePaneContextMenu}
           onConnect={handleConnect}
           fitView
+          deleteKeyCode={null}
         >
           <Background
             style={{
