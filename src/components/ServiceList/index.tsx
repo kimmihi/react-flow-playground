@@ -1,14 +1,46 @@
 import type { Service } from "../../types";
 
-import { Box, MenuList, MenuItem, List, ListItemText } from "@mui/material";
+import { useState } from "react";
 
-interface Props {
-  selectedServiceId: number;
-  list: Service[];
-  onSelect: (serviceId: number) => void;
-}
+import {
+  Box,
+  MenuList,
+  MenuItem,
+  ListItemText,
+  TextField,
+  Button,
+} from "@mui/material";
 
-const ServiceList = ({ selectedServiceId, list, onSelect }: Props) => {
+import { useAppSelector, useAppDispatch } from "src/store";
+import {
+  selectServiceList,
+  selectCurrentServiceId,
+  createService,
+  changeCurrentSerivce,
+} from "src/store/slices/editor";
+
+interface Props {}
+
+const ServiceList = () => {
+  const dispatch = useAppDispatch();
+  const currentServiceId = useAppSelector(selectCurrentServiceId);
+  const servicesList = useAppSelector(selectServiceList);
+
+  const [serviceName, setServiceName] = useState("");
+
+  const handleClickAdd = () => {
+    if (serviceName === "") {
+      return;
+    }
+
+    dispatch(createService({ serviceName }));
+    setServiceName("");
+  };
+
+  const handleSelectService = (serviceId: string) => {
+    dispatch(changeCurrentSerivce(serviceId));
+  };
+
   return (
     <Box
       sx={{
@@ -19,12 +51,28 @@ const ServiceList = ({ selectedServiceId, list, onSelect }: Props) => {
       }}
     >
       <h2>Service List</h2>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <TextField
+          fullWidth
+          value={serviceName}
+          onChange={(e) => setServiceName(e.target.value)}
+        />
+        <Button variant="outlined" onClick={handleClickAdd}>
+          Add
+        </Button>
+      </Box>
       <MenuList>
-        {list.map((service) => (
+        {servicesList.map((service) => (
           <MenuItem
             key={service.id}
-            onClick={() => onSelect(service.id)}
-            selected={service.id === selectedServiceId}
+            selected={service.id === currentServiceId}
+            onClick={() => handleSelectService(service.id)}
           >
             <ListItemText>{service.name}</ListItemText>
           </MenuItem>

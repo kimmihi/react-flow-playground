@@ -4,19 +4,34 @@ import { Popover, MenuList, MenuItem, ListItemText } from "@mui/material";
 
 import CreateNodeDialog from "./CreateNodeDialog";
 
+import { useAppDispatch, useAppSelector } from "src/store";
+import { createNode, selectCurrentServiceId } from "src/store/slices/editor";
+
 interface Props {
   open: boolean;
   top: number;
   left: number;
-  onCreate: (top: number, left: number, name: string) => void;
   onClose: () => void;
 }
 
-const PaneContextMenu = ({ open, top, left, onCreate, onClose }: Props) => {
+const PaneContextMenu = ({ open, top, left, onClose }: Props) => {
+  const dispatch = useAppDispatch();
+  const currentServiceId = useAppSelector(selectCurrentServiceId);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
 
   const handleCreate = (name: string) => {
-    onCreate(top, left, name);
+    if (currentServiceId === null) {
+      return;
+    }
+
+    dispatch(
+      createNode({
+        serviceId: currentServiceId,
+        nodeName: name,
+        x: left,
+        y: top,
+      })
+    );
     handleClose();
     onClose();
   };
@@ -47,6 +62,7 @@ const PaneContextMenu = ({ open, top, left, onCreate, onClose }: Props) => {
         </MenuList>
       </Popover>
       <CreateNodeDialog
+        key={`${currentServiceId}-${isOpenDialog}`}
         open={isOpenDialog}
         onClose={handleClose}
         onCreate={handleCreate}

@@ -21,6 +21,7 @@ const CreateNodeDialog = ({ open, onCreate, onClose }: Props) => {
   const handleChange = (newName: string) => {
     setNodeName(newName);
   };
+
   return (
     <Dialog open={open}>
       <DialogTitle>새로운 노드 생성</DialogTitle>
